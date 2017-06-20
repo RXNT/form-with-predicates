@@ -37,26 +37,33 @@ export default class FormWithRules extends Component {
             console.error(`Rule ${rule} can't be processed`)
             return false;
         }
+        function check(refVal, refPredRule, predicate) {
+            if (refVal === undefined)
+                return false;
+            if (typeof refPredRule === 'object') {
+                // Complicated rule - like { greater then 10 }
+                return Object.
+                    keys(refPredRule).
+                    every((pred) => {
+                        if (pred === 'not') {
+                            return check(refVal, refPredRule[pred], predicate.not)
+                        } else {
+                            let predToUse = predicate[pred];
+                            let predValue = refPredRule[pred];
+                            return predToUse(refVal, predValue);
+                        }
+                    });
+            } else {
+                // Simple rule - like emptyString
+                return predicate[refPredRule](refVal)
+            }
+        }
         return Object.
             keys(rule).
             every((refPred) => {
                 let refVal = formData[refPred];
-                if (refVal === undefined)
-                    return false;
                 let refPredRule = rule[refPred];
-                if (typeof refPredRule === 'object') {
-                    // Complicated rule - like { greater then 10 }
-                    return Object.
-                        keys(refPredRule).
-                        every((pred) => {
-                            let predToUse = predicate[pred];
-                            let predValue = refPredRule[pred];
-                            return predToUse(refVal, predValue);
-                        });
-                } else {
-                    // Simple rule - like emptyString
-                    return predicate[refPredRule](refVal)
-                }
+                return check(refVal, refPredRule, predicate);
             })
 
     }

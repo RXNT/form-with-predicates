@@ -80,8 +80,9 @@ const rules = {
     },
     "telephone": {
         "age" : {
-            "greater": 10,
-            "less": 70
+            "not": {
+                "greater": 10
+            }
         }
     }
 };
