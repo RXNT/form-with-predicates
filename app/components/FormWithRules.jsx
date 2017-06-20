@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import Form from "react-jsonschema-form";
 import PropTypes from "prop-types";
 import predicate from 'is-predicate';
+import { updateSchema } from "./conditions";
 
 export default class FormWithRules extends Component {
 
@@ -20,18 +21,6 @@ export default class FormWithRules extends Component {
         this.setState({ schema, formData, uiSchema });
     }
 
-    // const rules = {
-    //     "password": {
-    //         "firstName": "emptyString"
-    //
-    //     },
-    //     "telephone": {
-    //         "age" : {
-    //             "greater": "10"
-    //         }
-    //     }
-    // };
-
     hideField(rule, formData) {
         if (typeof rule !== 'object') {
             console.error(`Rule ${rule} can't be processed`)
@@ -40,7 +29,9 @@ export default class FormWithRules extends Component {
         function check(refVal, refPredRule, predicate) {
             if (refVal === undefined)
                 return false;
-            if (typeof refPredRule === 'object') {
+            if (Array.isArray(refPredRule)) {
+                return refPredRule.every(rule => predicate[rule](refVal));
+            } else if (typeof refPredRule === 'object') {
                 // Complicated rule - like { greater then 10 }
                 return Object.
                     keys(refPredRule).
@@ -53,9 +44,9 @@ export default class FormWithRules extends Component {
                             return predToUse(refVal, predValue);
                         }
                     });
-            } else {
+            }  else {
                 // Simple rule - like emptyString
-                return predicate[refPredRule](refVal)
+                return predicate[refPredRule](refVal);
             }
         }
         return Object.
@@ -87,7 +78,7 @@ export default class FormWithRules extends Component {
 
     ruleTracker(state) {
         let {formData} = state;
-        this.updateSchema(this.props.rules, formData);
+        updateSchema(this.props.rules, formData);
         if (this.props.onChange) this.props.onChange(state);
     }
 
