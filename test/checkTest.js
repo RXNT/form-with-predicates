@@ -5,21 +5,23 @@ function isObject(obj) {
     return typeof obj === 'object' && obj !== null
 }
 
-function check(refVal, refRule, predicate) {
+function check(refVal, refRule, predicate, condition = Array.prototype.every) {
     if (refVal === undefined)
         return false;
     if (isObject(refRule)) {
         // Complicated rule - like { greater then 10 }
-        return Object.
-            keys(refRule).
-            every((p) => {
-                let comparable = refRule[p];
-                if (isObject(comparable) || p === "not") {
-                    return check(refVal, comparable, predicate[p]);
+        return condition.call(Object.keys(refRule), (p) => {
+            let comparable = refRule[p];
+            if (isObject(comparable) || p === "not") {
+                if (p === "or") {
+                    return check(refVal, comparable, predicate, Array.prototype.some);
                 } else {
-                    return predicate[p](refVal, comparable);
+                    return check(refVal, comparable, predicate[p], condition);
                 }
-            });
+            } else {
+                return predicate[p](refVal, comparable);
+            }
+        });
     }  else {
         // Simple rule - like emptyString
         return predicate[refRule](refVal);
@@ -62,6 +64,16 @@ describe('Check', function() {
             assert.equal(check(10, { "not" : { "greater": 5, "less": 12 } }, predicate), false);
             assert.equal(check(15, { "not" : { "greater": 5, "less": 12 } }, predicate), false);
         });
+    })
+    describe('or', function() {
+        let rule = { "or": { "less": 5, "greater": 12 } };
+        it("< 5 || > 12", function() {
+            assert.equal(check(1, rule, predicate), true);
+            assert.equal(check(8, rule, predicate), false);
+            assert.equal(check(15, rule, predicate), true);
+        });
+
+
     })
 
 });
