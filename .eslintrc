@@ -4,7 +4,7 @@
     "react/jsx-uses-react": 2,
     "react/jsx-uses-vars": 2,
     "react/react-in-jsx-scope": 2,
-    "react/jsx-space-before-closing": [1, "always"],
+    "react/jsx-tag-spacing": 0,
     "curly": [2],
     "linebreak-style": [2, "unix"],
     "semi": [2, "always"],
@@ -24,10 +24,12 @@
     "node": true
   },
   "extends": "eslint:recommended",
-  "ecmaFeatures": {
-    "modules": true,
-    "jsx": true,
-    "experimentalObjectRestSpread": true
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
   "plugins": [
     "react"

@@ -28,4 +28,22 @@ describe("isRuleApplicable", function() {
       );
     });
   });
+  describe("default use and", function() {
+    let rule = {
+      firstName: {
+        equal: "Will",
+      },
+      lastName: {
+        equal: "Smith",
+      },
+    };
+    it("match only, when both match", function() {
+      assert.equal(isRuleApplicable(rule, { firstName: "Will" }), false);
+      assert.equal(isRuleApplicable(rule, { lastName: "Smith" }), false);
+      assert.equal(
+        isRuleApplicable(rule, { firstName: "Will", lastName: "Smith" }),
+        true
+      );
+    });
+  });
 });
