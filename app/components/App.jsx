@@ -1,6 +1,5 @@
 import React from 'react';
 import FormWithRules from './FormWithRules';
-import is from "@pwn/is";
 
 const schema = {
     "title": "A registration form",
