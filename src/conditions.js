@@ -58,8 +58,13 @@ export function check(
 }
 
 export function isRuleApplicable(rule, formData) {
-  if (!isObject(rule)) {
-    console.error(`Rule ${rule} can't be processed`);
+  if (!isObject(rule) || !isObject(formData)) {
+    let message = `Rule ${rule} with ${formData} can't be processed`;
+    if (process.env.NODE_ENV !== "production") {
+      throw new ReferenceError(message);
+    } else {
+      console.error(message);
+    }
     return false;
   }
   return Object.keys(rule).every(refPred => {
