@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { check } = require("form-with-predicate/conditions");
+const { check } = require("../src/conditions");
 
 describe("Check", function() {
   describe("singleLine", function() {
