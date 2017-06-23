@@ -1,11 +1,12 @@
 var webpack = require("webpack");
+var path = require("path");
 
 module.exports = {
     cache: true,
     context: __dirname + "/src",
     entry: "./index.js",
     output: {
-        path: "./dist",
+        path: path.resolve(__dirname, 'dist'),
         publicPath: "/dist/",
         filename: "form-with-predicate.js",
         library: "JSONSchemaForm",
@@ -31,7 +32,7 @@ module.exports = {
         loaders: [
             {
                 test: /\.js$/,
-                loaders: ["babel"],
+                loaders: ["babel-loader"],
             }
         ]
     }

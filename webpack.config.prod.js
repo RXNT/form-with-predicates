@@ -3,14 +3,13 @@ var webpack = require("webpack");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
-    entry: "./playground/app",
+    entry: path.join(__dirname, "playground/app"),
     output: {
         path: path.join(__dirname, "build"),
         filename: "bundle.js",
         publicPath: "/static/"
     },
     plugins: [
-        new ExtractTextPlugin("styles.css", { allChunks: true }),
         new webpack.DefinePlugin({
             "process.env": {
                 NODE_ENV: JSON.stringify("production")
@@ -18,13 +17,13 @@ module.exports = {
         })
     ],
     resolve: {
-        extensions: ["", ".js", ".jsx", ".css"]
+        extensions: [".js", ".jsx", ".css"]
     },
     module: {
         loaders: [
             {
                 test: /\.jsx?$/,
-                loader: "babel",
+                loader: "babel-loader",
                 include: [
                     path.join(__dirname, "src"),
                     path.join(__dirname, "playground"),
