@@ -1,16 +1,16 @@
 import React, {Component} from "react";
 import Form from "react-jsonschema-form";
 import PropTypes from "prop-types";
-import predicate from 'is-predicate';
-import { updateSchema } from "./conditions";
+import { actionToFields } from "./conditions";
+import deepcopy from 'deepcopy';
 
 export default class FormWithRules extends Component {
 
     constructor(props) {
         super(props);
 
-        let { schema, formData, uiSchema } = this.props;
-        this.state = { schema, formData, uiSchema };
+        let { formData } = this.props;
+        this.state = this.updateSchema(formData);
 
         this.ruleTracker = this.ruleTracker.bind(this);
         this.updateSchema = this.updateSchema.bind(this);
@@ -21,64 +21,40 @@ export default class FormWithRules extends Component {
         this.setState({ schema, formData, uiSchema });
     }
 
-    hideField(rule, formData) {
-        if (typeof rule !== 'object') {
-            console.error(`Rule ${rule} can't be processed`)
-            return false;
-        }
-        function check(refVal, refPredRule, predicate) {
-            if (refVal === undefined)
-                return false;
-            if (Array.isArray(refPredRule)) {
-                return refPredRule.every(rule => predicate[rule](refVal));
-            } else if (typeof refPredRule === 'object') {
-                // Complicated rule - like { greater then 10 }
-                return Object.
-                    keys(refPredRule).
-                    every((pred) => {
-                        if (pred === 'not') {
-                            return check(refVal, refPredRule[pred], predicate.not)
-                        } else {
-                            let predToUse = predicate[pred];
-                            let predValue = refPredRule[pred];
-                            return predToUse(refVal, predValue);
-                        }
-                    });
-            }  else {
-                // Simple rule - like emptyString
-                return predicate[refPredRule](refVal);
-            }
-        }
-        return Object.
-            keys(rule).
-            every((refPred) => {
-                let refVal = formData[refPred];
-                let refPredRule = rule[refPred];
-                return check(refVal, refPredRule, predicate);
-            })
-
-    }
-
-    updateSchema(rules, formData = {}) {
+    updateSchema(formData = {}) {
+        let rules = this.props.rules;
         let properties = Object.assign({}, this.props.schema.properties);
-        let uiSchema = Object.assign({}, this.props.uiSchema);
+        let uiSchema = deepcopy(this.props.uiSchema);
 
         Object.
             keys(rules).
-            map((field) => {
-                if (this.hideField(rules[field], formData)) {
-                    delete properties[field];
-                    delete uiSchema[field];
+            map((action) => {
+                switch(action) {
+                    case "hide": {
+                        let actions = actionToFields(rules[action], formData)
+                        Object.keys(actions).filter((key) => actions[key]).forEach((key) => {
+                            delete properties[key];
+                            delete uiSchema[key];
+                        })
+                    }
+                    case "red": {
+                        let actions = actionToFields(rules[action], formData)
+                        Object.keys(actions).filter((key) => actions[key]).forEach((key) => {
+                            if (uiSchema[key] === undefined) uiSchema[key] = {};
+                            if (uiSchema[key]["classNames"] === undefined) uiSchema[key]["classNames"] = "";
+                            uiSchema[key]["classNames"] = uiSchema[key]["classNames"] + " red";
+                        })
+                    }
                 }
             });
 
         let schema = Object.assign({}, this.props.schema, { properties });
-        this.setState({ schema, uiSchema: uiSchema, formData: Object.assign({}, formData) });
+        return { schema, uiSchema, formData: Object.assign({}, formData) };
     }
 
     ruleTracker(state) {
         let {formData} = state;
-        updateSchema(this.props.rules, formData);
+        this.setState(this.updateSchema(formData));
         if (this.props.onChange) this.props.onChange(state);
     }
 
@@ -96,8 +72,7 @@ export default class FormWithRules extends Component {
                       schema={this.state.schema}
                       uiSchema={this.state.uiSchema}
                       formData={this.state.formData}
-                      onChange={this.ruleTracker}
-                      onError={this.handleError}/>
+                      onChange={this.ruleTracker}/>
             </div>
         )
     }

@@ -75,19 +75,32 @@ const uiSchema = {
 };
 
 const rules = {
-    "password": {
-        "firstName": "empty"
+    "hide": {
+        "password": {
+            "firstName": "empty",
+        },
+        "telephone": {
+            "age": {
+                "or": {
+                    "greater": 70,
+                    "less": 10,
+                }
+            }
+        }
     },
-    "telephone": {
-        "age" : {
-            "less": 10
+    "red": {
+        "password": {
+            "firstName": {
+                "is": "admin"
+            }
         }
     }
 };
 
 const formData = {
     lastName: "",
-    firstName: ""
+    firstName: "",
+    age: 20
 };
 
 export default class App extends React.Component {

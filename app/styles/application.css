@@ -18,3 +18,7 @@ a:hover {
 h5 > a {
   text-decoration: underline;
 }
+
+.red {
+  background-color: red;
+}

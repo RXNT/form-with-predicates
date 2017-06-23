@@ -1,56 +1,54 @@
 import predicate from 'is-predicate';
 
-function check(refVal, refPredRule, predicate) {
+const POSITIVE_PREDICATE = predicate;
+const NEGATIVE_PREDICATE = predicate.not;
+
+function isObject(obj) {
+    return typeof obj === 'object' && obj !== null
+}
+
+function check(refVal, refRule, predicator = predicate, condition = Array.prototype.every) {
     if (refVal === undefined)
-        return false;
-    if (Array.isArray(refPredRule)) {
-        return refPredRule.every(rule => predicate[rule](refVal));
-    } else if (typeof refPredRule === 'object') {
+        return true;
+    if (isObject(refRule)) {
         // Complicated rule - like { greater then 10 }
-        return Object.
-        keys(refPredRule).
-        every((pred) => {
-            if (pred === 'not') {
-                return check(refVal, refPredRule[pred], predicate.not)
+        return condition.call(Object.keys(refRule), (p) => {
+            let comparable = refRule[p];
+            if (isObject(comparable) || p === "not") {
+                if (p === "or") {
+                    return check(refVal, comparable, predicator, Array.prototype.some);
+                } else if (p === "not") {
+                    let oppositePredicator = predicator === NEGATIVE_PREDICATE ? POSITIVE_PREDICATE : NEGATIVE_PREDICATE;
+                    return check(refVal, comparable, oppositePredicator, Array.prototype.every);
+                } else {
+                    return check(refVal, comparable, predicator[p], Array.prototype.every);
+                }
             } else {
-                let predToUse = predicate[pred];
-                let predValue = refPredRule[pred];
-                return predToUse(refVal, predValue);
+                return predicator[p](refVal, comparable);
             }
         });
     }  else {
         // Simple rule - like emptyString
-        return predicate[refPredRule](refVal);
+        return predicator[refRule](refVal);
     }
-}
+};
 
 function isRuleApplicable(rule, formData) {
-    if (typeof rule !== 'object') {
+    if (!isObject(rule)) {
         console.error(`Rule ${rule} can't be processed`)
         return false;
     }
     return Object.
-    keys(rule).
-    every((refPred) => {
-        let refVal = formData[refPred];
-        let refPredRule = rule[refPred];
-        return check(refVal, refPredRule, predicate);
-    })
+        keys(rule).
+        every((refPred) => {
+            let refVal = formData[refPred];
+            let refPredRule = rule[refPred];
+            return check(refVal, refPredRule);
+        })
 
 };
 
-// const rules = {
-//     "password": {
-//         "firstName": "emptyString"
-//     },
-//     "telephone": {
-//         "age" : {
-//             "greater": "10"
-//         }
-//     }
-// };
-
-export const updateSchema = (rules = {}, formData = {}) => {
+export const actionToFields = (rules = {}, formData = {}) => {
     let actions = Object.
         keys(rules).
         map((field) => {
