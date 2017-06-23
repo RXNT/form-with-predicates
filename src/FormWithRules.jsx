@@ -11,9 +11,6 @@ export default class FormWithRules extends Component {
 
         let { formData } = this.props;
         this.state = this.updateSchema(formData);
-
-        this.ruleTracker = this.ruleTracker.bind(this);
-        this.updateSchema = this.updateSchema.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -21,7 +18,7 @@ export default class FormWithRules extends Component {
         this.setState({ schema, formData, uiSchema });
     }
 
-    updateSchema(formData = {}) {
+    updateSchema = (formData = {}) => {
         let rules = this.props.rules;
         let schema = deepcopy(this.props.schema);
         let uiSchema = deepcopy(this.props.uiSchema);
@@ -49,13 +46,13 @@ export default class FormWithRules extends Component {
             });
 
         return { schema, uiSchema, formData: Object.assign({}, formData) };
-    }
+    };
 
-    ruleTracker(state) {
+    ruleTracker = (state) => {
         let {formData} = state;
         this.setState(this.updateSchema(formData));
         if (this.props.onChange) this.props.onChange(state);
-    }
+    };
 
     render() {
         let configs = Object.assign({}, this.props);

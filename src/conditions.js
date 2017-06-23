@@ -8,56 +8,62 @@ export function isObject(obj) {
 }
 
 export function check(
-  refVal,
-  refRule,
+  fieldVal,
+  rule,
   predicator = predicate,
   condition = Array.prototype.every
 ) {
-  if (refVal === undefined) {
-    return true;
-  }
-  if (isObject(refRule)) {
+  if (isObject(rule)) {
     // Complicated rule - like { greater then 10 }
-    return condition.call(Object.keys(refRule), p => {
-      let comparable = refRule[p];
+    return condition.call(Object.keys(rule), p => {
+      let comparable = rule[p];
       if (isObject(comparable) || p === "not") {
         if (p === "or") {
           if (Array.isArray(comparable)) {
             return comparable.some(condition =>
-              check(refVal, condition, predicator, Array.prototype.every)
+              check(fieldVal, condition, predicator, Array.prototype.every)
             );
           } else {
-            return check(refVal, comparable, predicator, Array.prototype.some);
+            return check(
+              fieldVal,
+              comparable,
+              predicator,
+              Array.prototype.some
+            );
           }
         } else if (p === "not") {
           let oppositePredicator = predicator === NEGATIVE_PREDICATE
             ? POSITIVE_PREDICATE
             : NEGATIVE_PREDICATE;
           return check(
-            refVal,
+            fieldVal,
             comparable,
             oppositePredicator,
             Array.prototype.every
           );
         } else {
           return check(
-            refVal,
+            fieldVal,
             comparable,
             predicator[p],
             Array.prototype.every
           );
         }
       } else {
-        return predicator[p](refVal, comparable);
+        return predicator[p](fieldVal, comparable);
       }
     });
   } else {
     // Simple rule - like emptyString
-    return predicator[refRule](refVal);
+    return predicator[rule](fieldVal);
   }
 }
 
-export function isRuleApplicable(rule, formData) {
+export function isRuleApplicable(
+  rule,
+  formData,
+  condition = Array.prototype.every
+) {
   if (!isObject(rule) || !isObject(formData)) {
     let message = `Rule ${rule} with ${formData} can't be processed`;
     if (process.env.NODE_ENV !== "production") {
@@ -67,10 +73,16 @@ export function isRuleApplicable(rule, formData) {
     }
     return false;
   }
-  return Object.keys(rule).every(refPred => {
-    let refVal = formData[refPred];
-    let refPredRule = rule[refPred];
-    return check(refVal, refPredRule);
+  return condition.call(Object.keys(rule), ref => {
+    if (ref === "or") {
+      return isRuleApplicable(rule[ref], formData, Array.prototype.some);
+    } else if (ref === "and") {
+      return isRuleApplicable(rule[ref], formData, Array.prototype.every);
+    } else {
+      let refVal = formData[ref];
+      let refFieldRule = rule[ref];
+      return check(refVal, refFieldRule);
+    }
   });
 }
 
