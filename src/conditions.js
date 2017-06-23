@@ -22,7 +22,13 @@ export function check(
       let comparable = refRule[p];
       if (isObject(comparable) || p === "not") {
         if (p === "or") {
-          return check(refVal, comparable, predicator, Array.prototype.some);
+          if (Array.isArray(comparable)) {
+            return comparable.some(condition =>
+              check(refVal, condition, predicator, Array.prototype.every)
+            );
+          } else {
+            return check(refVal, comparable, predicator, Array.prototype.some);
+          }
         } else if (p === "not") {
           let oppositePredicator = predicator === NEGATIVE_PREDICATE
             ? POSITIVE_PREDICATE

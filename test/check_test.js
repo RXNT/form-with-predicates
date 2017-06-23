@@ -45,6 +45,16 @@ describe("Check", function() {
       assert.equal(check(15, rule), true);
     });
   });
+  describe("or with array", function() {
+    let rule = { or: [{ greater: 5, less: 12 }, { greater: 20, less: 30 }] };
+    it("between 5 & 12 or between 20 & 30", function() {
+      assert.equal(check(1, rule), false);
+      assert.equal(check(8, rule), true);
+      assert.equal(check(15, rule), false);
+      assert.equal(check(21, rule), true);
+      assert.equal(check(31, rule), false);
+    });
+  });
   describe("not", function() {
     it("NOT empty check", function() {
       assert.equal(check("", { not: "empty" }), false);
