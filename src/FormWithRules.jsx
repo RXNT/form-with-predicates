@@ -23,7 +23,7 @@ export default class FormWithRules extends Component {
 
     updateSchema(formData = {}) {
         let rules = this.props.rules;
-        let properties = Object.assign({}, this.props.schema.properties);
+        let schema = deepcopy(this.props.schema);
         let uiSchema = deepcopy(this.props.uiSchema);
 
         Object.
@@ -48,7 +48,6 @@ export default class FormWithRules extends Component {
                 }
             });
 
-        let schema = Object.assign({}, this.props.schema, { properties });
         return { schema, uiSchema, formData: Object.assign({}, formData) };
     }
 

@@ -3,11 +3,11 @@ import predicate from 'is-predicate';
 const POSITIVE_PREDICATE = predicate;
 const NEGATIVE_PREDICATE = predicate.not;
 
-function isObject(obj) {
+export function isObject(obj) {
     return typeof obj === 'object' && obj !== null
 }
 
-function check(refVal, refRule, predicator = predicate, condition = Array.prototype.every) {
+export function check(refVal, refRule, predicator = predicate, condition = Array.prototype.every) {
     if (refVal === undefined)
         return true;
     if (isObject(refRule)) {
@@ -33,7 +33,7 @@ function check(refVal, refRule, predicator = predicate, condition = Array.protot
     }
 };
 
-function isRuleApplicable(rule, formData) {
+export function isRuleApplicable(rule, formData) {
     if (!isObject(rule)) {
         console.error(`Rule ${rule} can't be processed`)
         return false;

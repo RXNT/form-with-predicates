@@ -1,13 +1,10 @@
 import React from 'react';
-import FormWithRules from './FormWithRules';
+import FormWithRules from 'form-with-rules/FormWithRules';
 
 const schema = {
     "title": "A registration form",
     "type": "object",
-    "required": [
-        "firstName",
-        "lastName"
-    ],
+    "required": [ "firstName", "lastName"],
     "properties": {
         "firstName": {
             "type": "string",
@@ -74,7 +71,7 @@ const uiSchema = {
 };
 
 const rules = {
-    "hide": {
+    "remove": {
         "password": {
             "firstName": "empty",
         },
@@ -87,7 +84,7 @@ const rules = {
             }
         }
     },
-    "red": {
+    "require": {
         "password": {
             "firstName": {
                 "is": "admin"
