@@ -1,5 +1,4 @@
-# form-with-predicates
-========
+# FormWithPredicates
 
 This project extends [[https://github.com/mozilla-services/react-jsonschema-form]] with conditional action logic. This is primerely useful for complicated schemas with conditional logic, which should be manageable and changeable without modifying running application.
 
